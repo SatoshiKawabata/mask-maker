@@ -1,0 +1,11 @@
+.scan-view__video {
+  transform: scaleX(-1);
+}
+.scan-view__container {
+  position: relative;
+}
+.scan-view__template {
+  position: absolute;
+  top: 0;
+  left: 0;
+}

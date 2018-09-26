@@ -1,0 +1,14 @@
+.avatar-view__container {
+  position: relative;
+}
+.avatar-view__videoel,
+.avatar-view__overlay,
+.avatar-view__webgl {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: scaleX(-1);
+}
+.avatar-view__masks {
+    display: none;
+}
