@@ -5,7 +5,7 @@ import { facemodel_numbering_new } from "./consts";
 export class ScanView extends React.Component<{}, {
   devices: MediaDeviceInfo[],
   selectedDevice: MediaDeviceInfo,
-  videoSrc: MediaStream,
+  videoSrc: string,
   snapshotSrc: string,
   snapshotName: string,
   snapshotBlob: Blob
@@ -20,7 +20,9 @@ export class ScanView extends React.Component<{}, {
       snapshotName: "",
       snapshotBlob: null
     };
+  }
 
+  componentWillMount() {
     navigator.mediaDevices.enumerateDevices().then(deviceList => {
       console.log("deviceList", deviceList);
       const devices = deviceList.filter(d => d.kind === "videoinput");
@@ -32,7 +34,7 @@ export class ScanView extends React.Component<{}, {
 
       // videoタグにカメラ画像を表示させる
       setUserMedia(selected.deviceId).then(stream => {
-        this.setState({ videoSrc: stream });
+        this.setState({ videoSrc: URL.createObjectURL(stream) });
       });
     });
   }
@@ -55,7 +57,7 @@ export class ScanView extends React.Component<{}, {
         <div className="scan-view__container">
           <video
             className="scan-view__video"
-            src={this.state.videoSrc ? URL.createObjectURL(this.state.videoSrc) : ""}
+            src={this.state.videoSrc ? this.state.videoSrc : ""}
             onCanPlay={this.onVideoCanPlay}
             ref="video"
             autoPlay />
@@ -111,7 +113,7 @@ export class ScanView extends React.Component<{}, {
     const d = this.state.devices.filter(d => d.deviceId === e.target.value)[0];
     this.setState({ selectedDevice: d });
     setUserMedia(this.state.selectedDevice.deviceId).then(stream => {
-      this.setState({ videoSrc: stream });
+      this.setState({ videoSrc: URL.createObjectURL(stream) });
     });
   }
 

@@ -1,4 +1,5 @@
 import * as React from "react";
+import "./AvatarView.css";
 import { Mask, MaskSelector, DEFAULT_MASKS } from "./Masks";
 const clm = require("../../clmtrackr/build/clmtrackr");
 const { pModel } = require("../../clmtrackr/models/model_pca_20_svm");
@@ -10,9 +11,6 @@ const ctrack = new clm.tracker();
 ctrack.init(pModel);
 const fd = new faceDeformer();
 
-/**
- * ちゃんとキャプチャされるか試す
- */
 export class AvatarView extends React.Component<{}, {
   videoSrc: string;
 }> {
@@ -44,9 +42,9 @@ export class AvatarView extends React.Component<{}, {
           this.selectedMask = mask;
           fd.load(mask.image, mask.uvMap, pModel);
         }} selectedMask={this.selectedMask}/>
-        <div id="container">
+        <div id="container" className="avatar-view__container">
           <video
-            className="video"
+            className="avatar-view__video"
             ref="video"
             width="400"
             height="300"
@@ -57,8 +55,8 @@ export class AvatarView extends React.Component<{}, {
             src={this.state.videoSrc}
             >
           </video>
-          <canvas ref="overlay" className="overlay" width="400" height="300"></canvas>
-          <canvas ref="webgl" className="webgl" width="400" height="300"></canvas>
+          <canvas ref="overlay" className="avatar-view__overlay" width="400" height="300"></canvas>
+          <canvas ref="webgl" className="avatar-view__webgl" width="400" height="300"></canvas>
         </div>
       </div>
     );
