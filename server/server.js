@@ -1,6 +1,9 @@
 const fs = require('fs');
 const multer = require('multer');
 const express = require('express');
+if (!fs.existsSync("./files")) {
+  fs.mkdirSync("./files");
+}
 
 module.exports = app => {
   const storage = multer.diskStorage({
