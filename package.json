@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^10.12.11",
     "babel-preset-react-app": "^3.1.2",
     "css-loader": "^1.0.0",
     "file-loader": "^2.0.0",

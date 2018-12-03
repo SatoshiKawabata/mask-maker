@@ -6,6 +6,9 @@
       "dom",
       "esnext"
     ],
+    "types": [
+      "node"
+   ],
     "module": "commonjs",
     "noUnusedLocals": true,
     "strictNullChecks": false
