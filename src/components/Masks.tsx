@@ -55,7 +55,7 @@ export class MaskSelector extends React.Component<{
   async componentWillMount() {
     const { files } = await requestGetImages();
     const masks = await Promise.all(
-      files.map(path => createMaskFromTemplate(`http://localhost:1234/files/${path}`, path))
+      files.map(path => createMaskFromTemplate(`./files/${path}`, path))
     );
     this.setState({
       masks: [
@@ -96,7 +96,7 @@ export class MaskSelector extends React.Component<{
 const requestGetImages = async () => {
   return new Promise<{ files: string[] }>((res, rej) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("GET", "http://localhost:1234/images");
+    xhr.open("GET", "./images");
     xhr.responseType = "json";
     xhr.onload = () => {
       res(xhr.response);

@@ -142,7 +142,7 @@ const requestPostImage = async (blob: Blob, fileName: string) => {
   const form = new FormData();
   form.append("image", blob, fileName);
   const xhr = new XMLHttpRequest();
-  xhr.open("POST", "http://localhost:1234/images", true);
+  xhr.open("POST", "./images", true);
   xhr.send(form);
   return new Promise((res, rej) => {
     xhr.onload = () => {
