@@ -14,7 +14,6 @@ export class ScanView extends React.Component<{}, {
     this.state = {
       devices: [],
       selectedDevice: null,
-      videoSrc: null,
       snapshotSrc: "",
       snapshotName: "",
       snapshotBlob: null
