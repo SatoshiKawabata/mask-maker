@@ -5,7 +5,6 @@ import { facemodel_numbering_new } from "./consts";
 export class ScanView extends React.Component<{}, {
   devices: MediaDeviceInfo[],
   selectedDevice: MediaDeviceInfo,
-  videoSrc: string,
   snapshotSrc: string,
   snapshotName: string,
   snapshotBlob: Blob
@@ -34,7 +33,11 @@ export class ScanView extends React.Component<{}, {
 
       // videoタグにカメラ画像を表示させる
       setUserMedia(selected.deviceId).then(stream => {
-        this.setState({ videoSrc: URL.createObjectURL(stream) });
+        try {
+          (this.refs.video as HTMLVideoElement).srcObject = stream;
+        } catch {
+          (this.refs.video as HTMLVideoElement).src = URL.createObjectURL(stream);
+        }
       });
     });
   }
@@ -57,7 +60,6 @@ export class ScanView extends React.Component<{}, {
         <div className="scan-view__container">
           <video
             className="scan-view__video"
-            src={this.state.videoSrc ? this.state.videoSrc : ""}
             onCanPlay={this.onVideoCanPlay}
             ref="video"
             autoPlay />
@@ -113,7 +115,11 @@ export class ScanView extends React.Component<{}, {
     const d = this.state.devices.filter(d => d.deviceId === e.target.value)[0];
     this.setState({ selectedDevice: d });
     setUserMedia(this.state.selectedDevice.deviceId).then(stream => {
-      this.setState({ videoSrc: URL.createObjectURL(stream) });
+      try {
+        (this.refs.video as HTMLVideoElement).srcObject = stream;
+      } catch {
+        (this.refs.video as HTMLVideoElement).src = URL.createObjectURL(stream);
+      }
     });
   }
 
