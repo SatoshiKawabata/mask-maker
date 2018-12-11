@@ -7,7 +7,8 @@ export class ScanView extends React.Component<{}, {
   selectedDevice: MediaDeviceInfo,
   snapshotSrc: string,
   snapshotName: string,
-  snapshotBlob: Blob
+  snapshotBlob: Blob,
+  uploadState: "none" | "uploading" | "success" | "failed",
 }> {
   constructor(props: {}) {
     super(props);
@@ -16,7 +17,8 @@ export class ScanView extends React.Component<{}, {
       selectedDevice: null,
       snapshotSrc: "",
       snapshotName: "",
-      snapshotBlob: null
+      snapshotBlob: null,
+      uploadState: "none"
     };
   }
 
@@ -83,6 +85,7 @@ export class ScanView extends React.Component<{}, {
                 <img src={this.state.snapshotSrc} />
               </div> : null
         }
+        <p>upload state: {this.state.uploadState}</p>
       </div>
     );
   }
@@ -97,7 +100,8 @@ export class ScanView extends React.Component<{}, {
     context.scale(-1,1);
     context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
     this.setState({
-      snapshotSrc: canvas.toDataURL('image/png')
+      snapshotSrc: canvas.toDataURL('image/png'),
+      uploadState: "none"
     });
     canvas.toBlob(blob => {
       this.setState({
@@ -123,12 +127,25 @@ export class ScanView extends React.Component<{}, {
   }
 
   private onClickSave = async () => {
-    await requestPostImage(this.state.snapshotBlob, this.state.snapshotName);
+    this.setState({
+      uploadState: "uploading"
+    });
+    const err = await requestPostImage(this.state.snapshotBlob, this.state.snapshotName);
     // autocomplete dataset
     const names = JSON.parse(localStorage.getItem("snapshot-names") || "[]");
     names.push(this.state.snapshotName);
     names.sort();
     localStorage.setItem("snapshot-names", JSON.stringify(names));
+    if (err) {
+      window.alert("upload failed");
+      this.setState({
+        uploadState: "failed"
+      });
+    } else {
+      this.setState({
+        uploadState: "success"
+      });
+    }
   }
 }
 
@@ -154,7 +171,7 @@ const requestPostImage = async (blob: Blob, fileName: string) => {
       res();
     };
     xhr.onerror = () => {
-      rej();
+      res("error");
     };
   })
 };

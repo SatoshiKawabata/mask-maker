@@ -74,6 +74,11 @@ export class AvatarView extends React.Component<{}, State> {
           </video>
           <canvas ref="overlay" className="avatar-view__overlay" width="400" height="300"></canvas>
           <canvas ref="webgl" className="avatar-view__webgl" width="400" height="300"></canvas>
+          {
+            this.state.isTracking
+              ? null
+              : <p className="avatar-view__note">Don't move!</p>
+          }
         </div>
       </div>
     );

@@ -1,6 +1,7 @@
 .avatar-view__container {
   position: relative;
 }
+
 .avatar-view__video,
 .avatar-view__overlay,
 .avatar-view__webgl {
@@ -8,4 +9,23 @@
   top: 0;
   left: 0;
   transform: scaleX(-1);
+}
+
+.avatar-view__note {
+  position: absolute;
+  width: 400px;
+  height: 300px;
+  text-align: center;
+  line-height: 300px;
+  font-weight: bold;
+  font-size: 32px;
+   -webkit-text-stroke-width: 1px;
+   -webkit-text-stroke-color: white;
+   animation: anime1 1s linear infinite alternate;
+}
+
+@keyframes anime1 {
+  0% {font-size: 30px}
+  50% {font-size: 35px}
+  100% {font-size: 30px}
 }
