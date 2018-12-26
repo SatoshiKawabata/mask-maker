@@ -9,6 +9,7 @@ export class ScanView extends React.Component<{}, {
   snapshotName: string,
   snapshotBlob: Blob,
   uploadState: "none" | "uploading" | "success" | "failed",
+  isVideoReverse: boolean
 }> {
   constructor(props: {}) {
     super(props);
@@ -18,7 +19,8 @@ export class ScanView extends React.Component<{}, {
       snapshotSrc: "",
       snapshotName: "",
       snapshotBlob: null,
-      uploadState: "none"
+      uploadState: "none",
+      isVideoReverse: false
     };
   }
 
@@ -26,7 +28,8 @@ export class ScanView extends React.Component<{}, {
     navigator.mediaDevices.enumerateDevices().then(deviceList => {
       console.log("deviceList", deviceList);
       const devices = deviceList.filter(d => d.kind === "videoinput");
-      const selected = devices[0];
+      const lastSelectedId = localStorage.getItem("scan-view-camera-device-id");
+      const selected = devices.find(d => d.deviceId === lastSelectedId) || devices[0];
       this.setState({
         devices,
         selectedDevice: selected
@@ -58,9 +61,16 @@ export class ScanView extends React.Component<{}, {
             })
           }
         </select>
+        <input
+          type="checkbox"
+          name=""
+          id="is-video-reverse"
+          checked={this.state.isVideoReverse}
+          onChange={() => this.setState({ isVideoReverse: !this.state.isVideoReverse })} />
+        <label htmlFor="is-video-reverse">Reverse</label>
         <div className="scan-view__container">
           <video
-            className="scan-view__video"
+            className={this.state.isVideoReverse ? "scan-view__video--reverse" : ""}
             onCanPlay={this.onVideoCanPlay}
             ref="video"
             autoPlay />
@@ -82,10 +92,10 @@ export class ScanView extends React.Component<{}, {
                   }
                 </datalist>
                 <button type="button" onClick={this.onClickSave} disabled={!this.state.snapshotBlob || !this.state.snapshotName}>Save</button>
+                <p>upload state: {this.state.uploadState}</p>
                 <img src={this.state.snapshotSrc} />
               </div> : null
         }
-        <p>upload state: {this.state.uploadState}</p>
       </div>
     );
   }
@@ -96,8 +106,10 @@ export class ScanView extends React.Component<{}, {
     const context = canvas.getContext('2d');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    context.translate(canvas.width,0);
-    context.scale(-1,1);
+    if (this.state.isVideoReverse) {
+      context.translate(canvas.width,0);
+      context.scale(-1,1);
+    }
     context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
     this.setState({
       snapshotSrc: canvas.toDataURL('image/png'),
@@ -117,7 +129,8 @@ export class ScanView extends React.Component<{}, {
   private onChangeDevice = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const d = this.state.devices.filter(d => d.deviceId === e.target.value)[0];
     this.setState({ selectedDevice: d });
-    setUserMedia(this.state.selectedDevice.deviceId).then(stream => {
+    setUserMedia(d.deviceId).then(stream => {
+      localStorage.setItem("scan-view-camera-device-id", d.deviceId);
       try {
         (this.refs.video as HTMLVideoElement).srcObject = stream;
       } catch {

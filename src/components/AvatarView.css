@@ -1,5 +1,6 @@
 .avatar-view__container {
   position: relative;
+  transform-origin: left top;
 }
 
 .avatar-view__video,

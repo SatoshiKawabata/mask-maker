@@ -1,4 +1,4 @@
-.scan-view__video {
+.scan-view__video--reverse {
   transform: scaleX(-1);
 }
 .scan-view__container {

@@ -43,5 +43,6 @@ module.exports = {
       before: server,
       contentBase: "./build",
       port: "1234"
-  }
+  },
+  devtool: 'inline-source-map'
 };
