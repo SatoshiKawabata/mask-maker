@@ -5,18 +5,29 @@ if (!fs.existsSync("./files")) {
   fs.mkdirSync("./files");
 }
 
-module.exports = app => {
-  const storage = multer.diskStorage({
+const uploader = multer({
+  storage: multer.diskStorage({
     destination: (req, file, cb) => {
       cb(null, './files/')
     },
     filename: (req, file, cb) => {
       cb(null, `${file.originalname}.png`);
     }
-  });
-  const uploader = multer({
-    storage
-  });
+  })
+});
+
+const uploaderForCapture = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, './captures/')
+    },
+    filename: (req, file, cb) => {
+      cb(null, `${file.originalname}.png`);
+    }
+  })
+});
+
+module.exports = app => {
 
   app.use("/files", express.static('files'));
 
@@ -32,6 +43,13 @@ module.exports = app => {
   });
 
   app.post("/images", uploader.single('image'), (req, res) => {
+    const file = req.file;
+    const meta = req.body;
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.status(200).json({msg: 'アップロード完了'});
+  });
+
+  app.post("/captures", uploaderForCapture.single('image'), (req, res) => {
     const file = req.file;
     const meta = req.body;
     res.setHeader("Access-Control-Allow-Origin", "*");

@@ -57,12 +57,16 @@ export class MaskSelector extends React.Component<{
     const masks = await Promise.all(
       files.map(path => createMaskFromTemplate(`./files/${path}`, path))
     );
+    const selectedMaskName = localStorage.getItem("last-saved-mask-name");
+    const selectedMask = masks.find(mask => mask.name === selectedMaskName);
     this.setState({
       masks: [
         ...masks,
         ...DEFAULT_MASKS
-      ]
+      ],
+      selectedMask: selectedMask || this.state.selectedMask
     });
+    this.props.onChange(this.state.selectedMask);
   }
 
   render() {
@@ -79,7 +83,7 @@ export class MaskSelector extends React.Component<{
                 <option
                   value={mask.path}
                   key={mask.path}
-                  defaultValue={this.state.selectedMask.path}>{mask.name}</option>
+                  selected={mask.path === this.state.selectedMask.path}>{mask.name}</option>
               )
             })
           }

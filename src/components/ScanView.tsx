@@ -76,11 +76,13 @@ export class ScanView extends React.Component<{}, {
             autoPlay />
           <img className="scan-view__template" src={facemodel_numbering_new} ref="template"/>
         </div>
+        <button type="button" onClick={this.onClickSnapShotAndSave}>SnapShotAndSave</button>
         <button type="button" onClick={this.onClickSnapShot}>SnapShot</button>
         {
           this.state.snapshotSrc
             ? <div>
                 <input
+                  className="scan-view__snapshot-name"
                   type="text"
                   value={this.state.snapshotName}
                   onInput={e => this.setState({ snapshotName: (e.target as HTMLInputElement).value }) }
@@ -100,26 +102,28 @@ export class ScanView extends React.Component<{}, {
     );
   }
 
-  private onClickSnapShot = () => {
+  private onClickSnapShotAndSave = async () => {
+    await this.onClickSnapShot();
+    this.setState({
+      snapshotName: getNow()
+    });
+    await this.save(this.state.snapshotBlob, this.state.snapshotName);
+    localStorage.setItem("last-saved-mask-name", this.state.snapshotName + ".png");
+  }
+
+  private onClickSnapShot = async () => {
+    const blob = await this.createBlob();
+    this.setState({ snapshotBlob: blob });
+  }
+
+  private createBlob = () => {
     const video = this.refs.video as HTMLVideoElement;
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext('2d');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    if (this.state.isVideoReverse) {
-      context.translate(canvas.width,0);
-      context.scale(-1,1);
-    }
-    context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+    const canvas = video2Canvas(video, this.state.isVideoReverse);
     this.setState({
       snapshotSrc: canvas.toDataURL('image/png'),
       uploadState: "none"
     });
-    canvas.toBlob(blob => {
-      this.setState({
-        snapshotBlob: blob
-      });
-    });
+    return new Promise<Blob>(resolve => canvas.toBlob(resolve));
   }
 
   private onVideoCanPlay = () => {
@@ -140,15 +144,19 @@ export class ScanView extends React.Component<{}, {
   }
 
   private onClickSave = async () => {
-    this.setState({
-      uploadState: "uploading"
-    });
-    const err = await requestPostImage(this.state.snapshotBlob, this.state.snapshotName);
+    await this.save(this.state.snapshotBlob, this.state.snapshotName);
     // autocomplete dataset
     const names = JSON.parse(localStorage.getItem("snapshot-names") || "[]");
     names.push(this.state.snapshotName);
     names.sort();
     localStorage.setItem("snapshot-names", JSON.stringify(names));
+  }
+
+  private save = async (blob: Blob, fileName: string) => {
+    this.setState({
+      uploadState: "uploading"
+    });
+    const err = await requestPostImage(blob, fileName, "./images");
     if (err) {
       window.alert("upload failed");
       this.setState({
@@ -173,11 +181,11 @@ const setUserMedia = (deviceId: string) => {
   });
 };
 
-const requestPostImage = async (blob: Blob, fileName: string) => {
+const requestPostImage = async (blob: Blob, fileName: string, url: string) => {
   const form = new FormData();
   form.append("image", blob, fileName);
   const xhr = new XMLHttpRequest();
-  xhr.open("POST", "./images", true);
+  xhr.open("POST", url, true);
   xhr.send(form);
   return new Promise((res, rej) => {
     xhr.onload = () => {
@@ -188,3 +196,28 @@ const requestPostImage = async (blob: Blob, fileName: string) => {
     };
   })
 };
+
+const addZero = (num: number) => {
+  if (num < 10) {
+    return `0${num}`;
+  }
+  return num + "";
+}
+
+const video2Canvas = (video: HTMLVideoElement, isReverse: boolean = false) => {
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext('2d');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  if (isReverse) {
+    context.translate(canvas.width,0);
+    context.scale(-1,1);
+  }
+  context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+  return canvas;
+}
+
+const getNow = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${addZero(d.getMonth() + 1)}-${addZero(d.getDate())} ${addZero(d.getHours())}-${addZero(d.getMinutes())}-${addZero(d.getSeconds())}`;
+}

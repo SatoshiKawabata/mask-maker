@@ -9,3 +9,6 @@
   top: 0;
   left: 0;
 }
+.scan-view__snapshot-name {
+  width: 200px;
+}
