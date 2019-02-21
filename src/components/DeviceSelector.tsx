@@ -3,6 +3,8 @@ import * as React from "react";
 interface P {
     onChangeDevice: (d: { stream: MediaStream, info: MediaDeviceInfo }) => void;
     defaultId: string;
+    cameraWidth: number;
+    cameraHeight: number;
 }
 export class DeviceSelector extends React.Component<P, {
     devices: MediaDeviceInfo[],
@@ -25,7 +27,7 @@ export class DeviceSelector extends React.Component<P, {
           selectedDevice: selected
         });
 
-        const stream = await setUserMedia(selected.deviceId);
+        const stream = await setUserMedia(this.props.cameraWidth, this.props.cameraHeight, selected.deviceId);
         this.props.onChangeDevice({ stream, info: selected });
     }
     render() {
@@ -47,17 +49,17 @@ export class DeviceSelector extends React.Component<P, {
     private onChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
         const d = this.state.devices.filter(d => d.deviceId === e.target.value)[0];
         this.setState({ selectedDevice: d });
-        const stream = await setUserMedia(d.deviceId);
+        const stream = await setUserMedia(this.props.cameraWidth, this.props.cameraHeight, d.deviceId);
         this.props.onChangeDevice({ stream, info: d });
     }
 }
 
-const setUserMedia = (deviceId: string) => {
+const setUserMedia = (cameraWidth: number, cameraHeight: number, deviceId: string) => {
     return navigator.mediaDevices.getUserMedia({
       video: {
         deviceId,
-        width: 1280,
-        height: 720
+        width: cameraWidth,
+        height: cameraHeight
       },
       audio: false
     });

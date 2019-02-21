@@ -25,6 +25,8 @@ export class ScanView extends React.Component<{}, {
     return (
       <div>
         <DeviceSelector
+          cameraWidth={1280}
+          cameraHeight={720}
           defaultId={localStorage.getItem("scan-view-camera-device-id")}
           onChangeDevice={({ stream, info }) => {
             localStorage.setItem("scan-view-camera-device-id", info.deviceId);

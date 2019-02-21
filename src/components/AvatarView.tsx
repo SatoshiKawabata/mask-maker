@@ -61,6 +61,8 @@ export class AvatarView extends React.Component<{}, State> {
         <button type="button" onClick={this.restartTracking}>restart</button>
         <DeviceSelector
           defaultId={localStorage.getItem("avatar-view-camera-device-id")}
+          cameraWidth={400}
+          cameraHeight={300}
           onChangeDevice={({ stream, info }) => {
             localStorage.setItem("avatar-view-camera-device-id", info.deviceId);
             try {
@@ -119,7 +121,7 @@ export class AvatarView extends React.Component<{}, State> {
     // check whether mask has converged
     const pn = this.ctrack.getConvergence();
     // console.log(pn, this.ctrack.getScore())
-    if (pn < 1000.4) {
+    if (pn < 0.4) {
       this.faceDeformer.load(this.selectedMask.image, this.selectedMask.uvMap, pModel);
       this.animationFrameId = requestAnimationFrame(this.drawMaskLoop);
       this.setState({
