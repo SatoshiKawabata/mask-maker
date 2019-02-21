@@ -1,10 +1,9 @@
 import * as React from "react";
 import "./ScanView.css";
 import { facemodel_numbering_new } from "./consts";
+import { DeviceSelector } from "./DeviceSelector";
 
 export class ScanView extends React.Component<{}, {
-  devices: MediaDeviceInfo[],
-  selectedDevice: MediaDeviceInfo,
   snapshotSrc: string,
   snapshotName: string,
   snapshotBlob: Blob,
@@ -14,8 +13,6 @@ export class ScanView extends React.Component<{}, {
   constructor(props: {}) {
     super(props);
     this.state = {
-      devices: [],
-      selectedDevice: null,
       snapshotSrc: "",
       snapshotName: "",
       snapshotBlob: null,
@@ -24,43 +21,19 @@ export class ScanView extends React.Component<{}, {
     };
   }
 
-  componentWillMount() {
-    navigator.mediaDevices.enumerateDevices().then(deviceList => {
-      console.log("deviceList", deviceList);
-      const devices = deviceList.filter(d => d.kind === "videoinput");
-      const lastSelectedId = localStorage.getItem("scan-view-camera-device-id");
-      const selected = devices.find(d => d.deviceId === lastSelectedId) || devices[0];
-      this.setState({
-        devices,
-        selectedDevice: selected
-      });
-
-      // videoタグにカメラ画像を表示させる
-      setUserMedia(selected.deviceId).then(stream => {
-        try {
-          (this.refs.video as HTMLVideoElement).srcObject = stream;
-        } catch {
-          (this.refs.video as HTMLVideoElement).src = URL.createObjectURL(stream);
-        }
-      });
-    });
-  }
-
   render() {
     return (
       <div>
-        <select onChange={this.onChangeDevice}>
-          {
-            this.state.devices.map(device => {
-              return <option
-                value={device.deviceId}
-                defaultValue={device.deviceId}
-                key={device.deviceId}>
-                {device.label}
-              </option>
-            })
-          }
-        </select>
+        <DeviceSelector
+          defaultId={localStorage.getItem("scan-view-camera-device-id")}
+          onChangeDevice={({ stream, info }) => {
+            localStorage.setItem("scan-view-camera-device-id", info.deviceId);
+            try {
+              (this.refs.video as HTMLVideoElement).srcObject = stream;
+            } catch {
+              (this.refs.video as HTMLVideoElement).src = URL.createObjectURL(stream);
+            }
+          }} />
         <input
           type="checkbox"
           name=""
@@ -130,19 +103,6 @@ export class ScanView extends React.Component<{}, {
     (this.refs.template as HTMLImageElement).height = (this.refs.video as HTMLVideoElement).videoHeight;
   }
 
-  private onChangeDevice = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const d = this.state.devices.filter(d => d.deviceId === e.target.value)[0];
-    this.setState({ selectedDevice: d });
-    setUserMedia(d.deviceId).then(stream => {
-      localStorage.setItem("scan-view-camera-device-id", d.deviceId);
-      try {
-        (this.refs.video as HTMLVideoElement).srcObject = stream;
-      } catch {
-        (this.refs.video as HTMLVideoElement).src = URL.createObjectURL(stream);
-      }
-    });
-  }
-
   private onClickSave = async () => {
     await this.save(this.state.snapshotBlob, this.state.snapshotName);
     // autocomplete dataset
@@ -169,17 +129,6 @@ export class ScanView extends React.Component<{}, {
     }
   }
 }
-
-const setUserMedia = (deviceId: string) => {
-  return navigator.mediaDevices.getUserMedia({
-    video: {
-      deviceId,
-      width: 1280,
-      height: 720
-    },
-    audio: false
-  });
-};
 
 const requestPostImage = async (blob: Blob, fileName: string, url: string) => {
   const form = new FormData();

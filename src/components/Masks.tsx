@@ -73,7 +73,6 @@ export class MaskSelector extends React.Component<{
     return (
       <div>
         <select onChange={(e) => {
-            console.log(e.target.value);
             const mask = this.findMask(e.target.value);
             this.props.onChange(mask);
           }}>

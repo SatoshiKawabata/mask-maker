@@ -1,6 +1,7 @@
 import * as React from "react";
 import "./AvatarView.css";
 import { Mask, MaskSelector, DEFAULT_MASKS } from "./Masks";
+import { DeviceSelector } from "./DeviceSelector";
 const clm = require("../../clmtrackr/build/clmtrackr");
 const { pModel } = require("../../clmtrackr/models/model_pca_20_svm");
 const faceDeformer = require("../../clmtrackr/examples/js/face_deformer");
@@ -38,19 +39,6 @@ export class AvatarView extends React.Component<{}, State> {
     return this.state.isTracking !== nextState.isTracking || zoomChanged;
   }
 
-  componentDidMount() {
-    navigator
-      .mediaDevices
-      .getUserMedia({ video: true, audio: false })
-      .then(stream => {
-        try {
-          (this.refs.video as HTMLVideoElement).srcObject = stream;
-        } catch {
-          (this.refs.video as HTMLVideoElement).src = URL.createObjectURL(stream);
-        }
-      });
-  }
-
   componentWillUnmount() {
     this.faceDeformer.clear();
     this.ctrack.stop();
@@ -62,6 +50,16 @@ export class AvatarView extends React.Component<{}, State> {
     return (
       <div>
         <button type="button" onClick={this.restartTracking}>restart</button>
+        <DeviceSelector
+          defaultId={localStorage.getItem("avatar-view-camera-device-id")}
+          onChangeDevice={({ stream, info }) => {
+            localStorage.setItem("avatar-view-camera-device-id", info.deviceId);
+            try {
+              (this.refs.video as HTMLVideoElement).srcObject = stream;
+            } catch {
+              (this.refs.video as HTMLVideoElement).src = URL.createObjectURL(stream);
+            }
+          }} />
         <MaskSelector onChange={mask => {
           this.selectedMask = mask;
           this.faceDeformer.load(mask.image, mask.uvMap, pModel);
@@ -112,7 +110,7 @@ export class AvatarView extends React.Component<{}, State> {
     }
     // check whether mask has converged
     const pn = this.ctrack.getConvergence();
-    console.log(pn, this.ctrack.getScore())
+    // console.log(pn, this.ctrack.getScore())
     if (pn < 1000.5) {
       this.faceDeformer.load(this.selectedMask.image, this.selectedMask.uvMap, pModel);
       this.animationFrameId = requestAnimationFrame(this.drawMaskLoop);
@@ -127,7 +125,7 @@ export class AvatarView extends React.Component<{}, State> {
   private drawMaskLoop = () => {
     // get position of face
     const positions = this.ctrack.getCurrentPosition();
-    console.log(this.ctrack.getConvergence(), this.ctrack.getScore(), this.ctrack.getCurrentParameters())
+    // console.log(this.ctrack.getConvergence(), this.ctrack.getScore(), this.ctrack.getCurrentParameters())
     this.clearOverlay();
     if (positions) {
       // draw mask on top of face
