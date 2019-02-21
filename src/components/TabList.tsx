@@ -3,6 +3,11 @@ import { ScanView } from "./ScanView";
 import { AvatarView } from "./AvatarView";
 import "./TabList.css";
 
+const KEY_CODE = {
+  LEFT: 37,
+  RIGHT: 39
+};
+
 export class Tablist extends React.Component<{}, {
   view: "scan" | "avatar"
 }> {
@@ -11,6 +16,24 @@ export class Tablist extends React.Component<{}, {
     this.state = {
       view: localStorage.getItem("tab-view") as "scan" | "avatar" || "scan"
     };
+  }
+
+  componentDidMount() {
+    window.addEventListener("keydown", e => {
+      console.log(e);
+      switch (e.keyCode) {
+        case KEY_CODE.LEFT:
+          e.stopPropagation();
+          e.preventDefault();
+          this.setState({ view: "scan" });
+        break;
+        case KEY_CODE.RIGHT:
+          e.stopPropagation();
+          e.preventDefault();
+          this.setState({ view: "avatar" });
+          break;
+      }
+    });
   }
 
   render() {
