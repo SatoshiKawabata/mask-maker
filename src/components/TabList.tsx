@@ -20,7 +20,6 @@ export class Tablist extends React.Component<{}, {
 
   componentDidMount() {
     window.addEventListener("keydown", e => {
-      console.log(e);
       switch (e.keyCode) {
         case KEY_CODE.LEFT:
           e.stopPropagation();

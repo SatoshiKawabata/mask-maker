@@ -41,9 +41,16 @@ export class AvatarView extends React.Component<{}, State> {
     return this.state.isTracking !== nextState.isTracking || zoomChanged;
   }
 
+  componentDidMount() {
+    const webGLContext = (this.refs.webgl as HTMLCanvasElement).getContext("webgl");
+    webGLContext.viewport(0, 0, webGLContext.canvas.width, webGLContext.canvas.height);
+    this.faceDeformer.init(this.refs.webgl);
+  }
+
   componentWillUnmount() {
     this.faceDeformer.clear();
     this.ctrack.stop();
+    cancelAnimationFrame(this.animationFrameId);
     delete this.ctrack;
     delete this.faceDeformer;
   }
@@ -95,9 +102,6 @@ export class AvatarView extends React.Component<{}, State> {
   }
 
   private onReadyVideo = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    const webGLContext = (this.refs.webgl as HTMLCanvasElement).getContext("webgl");
-    webGLContext.viewport(0, 0, webGLContext.canvas.width, webGLContext.canvas.height);
-    this.faceDeformer.init(this.refs.webgl);
     this.ctrack.stop();
     this.ctrack.reset();
     this.ctrack.start(this.refs.video);
