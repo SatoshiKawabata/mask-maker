@@ -4,9 +4,11 @@ import { Mask, MaskSelector, DEFAULT_MASKS } from "./Masks";
 import { DeviceSelector } from "./DeviceSelector";
 const clm = require("../../clmtrackr/build/clmtrackr");
 const { pModel } = require("../../clmtrackr/models/model_pca_20_svm");
-const faceDeformer = require("../../clmtrackr/examples/js/face_deformer");
+require("../../clmtrackr/examples/js/face_deformer")
 const webglUtils = require("../../clmtrackr/examples/js/libs/webgl-utils");
 Object.assign(window, webglUtils);
+
+declare const faceDeformer: any;
 
 interface State {
   isTracking: boolean;
@@ -96,6 +98,8 @@ export class AvatarView extends React.Component<{}, State> {
     const webGLContext = (this.refs.webgl as HTMLCanvasElement).getContext("webgl");
     webGLContext.viewport(0, 0, webGLContext.canvas.width, webGLContext.canvas.height);
     this.faceDeformer.init(this.refs.webgl);
+    this.ctrack.stop();
+    this.ctrack.reset();
     this.ctrack.start(this.refs.video);
     this.drawGridLoop();
   }
@@ -111,7 +115,7 @@ export class AvatarView extends React.Component<{}, State> {
     // check whether mask has converged
     const pn = this.ctrack.getConvergence();
     // console.log(pn, this.ctrack.getScore())
-    if (pn < 1000.5) {
+    if (pn < 1000.4) {
       this.faceDeformer.load(this.selectedMask.image, this.selectedMask.uvMap, pModel);
       this.animationFrameId = requestAnimationFrame(this.drawMaskLoop);
       this.setState({
@@ -153,6 +157,7 @@ export class AvatarView extends React.Component<{}, State> {
   private clearOverlay = () => {
     const overlay = this.refs.overlay as HTMLCanvasElement
     if (!overlay) {
+      console.warn("no overlay");
       return;
     }
     ((overlay).getContext("2d") as CanvasRenderingContext2D).clearRect(0, 0, overlay.width, overlay.height);
