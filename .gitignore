@@ -6,3 +6,4 @@ package-lock.json
 /files/*
 /captures/*
 /build
+!/build/index.html
