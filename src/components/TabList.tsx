@@ -6,7 +6,10 @@ import { ScanFaceView } from "./ScanFaceView";
 
 const KEY_CODE = {
   LEFT: 37,
-  RIGHT: 39
+  RIGHT: 39,
+  ONE: 49,
+  TWO: 50,
+  THREE: 51
 };
 
 export class Tablist extends React.Component<{}, {
@@ -15,22 +18,27 @@ export class Tablist extends React.Component<{}, {
   constructor(props: {}) {
     super(props);
     this.state = {
-      view: localStorage.getItem("tab-view") as "scan" | "avatar" || "scan"
+      view: localStorage.getItem("tab-view") as "scan" | "avatar" || "scan-face"
     };
   }
 
   componentDidMount() {
     window.addEventListener("keydown", e => {
       switch (e.keyCode) {
-        case KEY_CODE.LEFT:
+        case KEY_CODE.ONE:
           e.stopPropagation();
           e.preventDefault();
           this.setState({ view: "scan" });
         break;
-        case KEY_CODE.RIGHT:
+        case KEY_CODE.TWO:
           e.stopPropagation();
           e.preventDefault();
           this.setState({ view: "avatar" });
+          break;
+        case KEY_CODE.THREE:
+          e.stopPropagation();
+          e.preventDefault();
+          this.setState({ view: "scan-face" });
           break;
       }
     });

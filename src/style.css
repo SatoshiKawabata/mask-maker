@@ -15,3 +15,7 @@
 .masks {
     display: none;
 }
+
+button {
+  padding: 10px;
+}
