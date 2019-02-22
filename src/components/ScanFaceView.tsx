@@ -2,8 +2,7 @@ import * as React from "react";
 import { DeviceSelector } from "./DeviceSelector";
 import { clearOverlay } from "./AvatarView";
 import { getNow, video2Canvas, requestPostImage } from "./ScanView";
-const clm = require("../../clmtrackr/build/clmtrackr");
-const { pModel } = require("../../clmtrackr/models/model_pca_20_svm");
+import { ClmtrackrWrapper } from "./ClmtrackrWrapper";
 
 interface State {
   zoom: number;
@@ -12,12 +11,11 @@ interface State {
 }
 export class ScanFaceView extends React.Component<{}, State> {
   private animationFrameId: number;
-  private ctrack: any;
+  private clmWrapper: ClmtrackrWrapper;
 
   constructor(props: any) {
     super(props);
-    this.ctrack = new clm.tracker();
-    this.ctrack.init(pModel);
+    this.clmWrapper = new ClmtrackrWrapper();
 
     this.state = {
       zoom: Number(localStorage.getItem("avatar-zoom") || "1"),
@@ -26,23 +24,14 @@ export class ScanFaceView extends React.Component<{}, State> {
     };
   }
 
-  // shouldComponentUpdate(nextProps: {}, nextState: State): boolean {
-  //   const zoomChanged = this.state.zoom !== nextState.zoom;
-  //   if (zoomChanged) {
-  //     localStorage.setItem("avatar-zoom", nextState.zoom.toString());
-  //   }
-  //   return zoomChanged;
-  // }
-
   componentDidMount() {
     const webGLContext = (this.refs.webgl as HTMLCanvasElement).getContext("webgl");
     webGLContext.viewport(0, 0, webGLContext.canvas.width, webGLContext.canvas.height);
   }
 
   componentWillUnmount() {
-    this.ctrack.stop();
     cancelAnimationFrame(this.animationFrameId);
-    delete this.ctrack;
+    this.clmWrapper.destructor();
   }
 
   render() {
@@ -62,7 +51,7 @@ export class ScanFaceView extends React.Component<{}, State> {
         }} />
       <button onClick={async () => {
         this.setState({ isSaving: true });
-        const positions = this.ctrack.getCurrentPosition();
+        const positions = this.clmWrapper.getCurrentPosition();
         const canvas = await video2Canvas(this.refs.video as HTMLVideoElement, false);
         const name = getNow();
         await requestPostJSON<{name: string, uv: number[][]}>({
@@ -102,28 +91,24 @@ export class ScanFaceView extends React.Component<{}, State> {
   }
 
   private onReadyVideo = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    this.ctrack.stop();
-    this.ctrack.reset();
-    this.ctrack.start(this.refs.video);
+    this.clmWrapper.start(this.refs.video as HTMLVideoElement);
     this.drawGridLoop();
   }
 
   private restartTracking = () => {
     cancelAnimationFrame(this.animationFrameId);
     clearOverlay(this.refs.overlay as HTMLCanvasElement);
-    this.ctrack.stop();
-    this.ctrack.reset();
-    this.ctrack.start(this.refs.video);
+    this.clmWrapper.start(this.refs.video as HTMLVideoElement);
     this.drawGridLoop();
   }
 
   private drawGridLoop = () => {
-    const positions = this.ctrack.getCurrentPosition();
+    const positions = this.clmWrapper.getCurrentPosition();
     const overlay = this.refs.overlay as HTMLCanvasElement
     clearOverlay(this.refs.overlay as HTMLCanvasElement);
     if (positions) {
       // draw current grid
-      this.ctrack.draw(overlay);
+      this.clmWrapper.drawPositions(overlay);
     }
     this.animationFrameId = requestAnimationFrame(this.drawGridLoop);
   }

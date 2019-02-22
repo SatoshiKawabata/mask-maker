@@ -2,7 +2,7 @@ import * as React from "react";
 import "./AvatarView.css";
 import { Mask, MaskSelector, DEFAULT_MASKS } from "./Masks";
 import { DeviceSelector } from "./DeviceSelector";
-const clm = require("../../clmtrackr/build/clmtrackr");
+import { ClmtrackrWrapper } from "./ClmtrackrWrapper";
 const { pModel } = require("../../clmtrackr/models/model_pca_20_svm");
 
 declare const faceDeformer: any;
@@ -11,17 +11,17 @@ interface State {
   isTracking: boolean;
   zoom: number;
 }
+
 export class AvatarView extends React.Component<{}, State> {
   private selectedMask: Mask = DEFAULT_MASKS[0];
   private animationFrameId: number;
 
-  private ctrack: any;
+  private clmWrapper: ClmtrackrWrapper;
   private faceDeformer: any;
 
   constructor(props: any) {
     super(props);
-    this.ctrack = new clm.tracker();
-    this.ctrack.init(pModel);
+    this.clmWrapper = new ClmtrackrWrapper();
     this.faceDeformer = new faceDeformer();
 
     this.state = {
@@ -46,9 +46,8 @@ export class AvatarView extends React.Component<{}, State> {
 
   componentWillUnmount() {
     this.faceDeformer.clear();
-    this.ctrack.stop();
+    this.clmWrapper.destructor();
     cancelAnimationFrame(this.animationFrameId);
-    delete this.ctrack;
     delete this.faceDeformer;
   }
 
@@ -101,23 +100,20 @@ export class AvatarView extends React.Component<{}, State> {
   }
 
   private onReadyVideo = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    this.ctrack.stop();
-    this.ctrack.reset();
-    this.ctrack.start(this.refs.video);
+    this.clmWrapper.start(this.refs.video as HTMLVideoElement);
     this.drawGridLoop();
   }
 
   private drawGridLoop = () => {
-    const positions = this.ctrack.getCurrentPosition();
+    const positions = this.clmWrapper.getCurrentPosition();
     const overlay = this.refs.overlay as HTMLCanvasElement
     clearOverlay(this.refs.overlay as HTMLCanvasElement);
     if (positions) {
       // draw current grid
-      this.ctrack.draw(overlay);
+      this.clmWrapper.drawPositions(overlay);
     }
     // check whether mask has converged
-    const pn = this.ctrack.getConvergence();
-    // console.log(pn, this.ctrack.getScore())
+    const pn = this.clmWrapper.getConvergence();
     if (pn < 10) {
       this.faceDeformer.load(this.selectedMask.image, this.selectedMask.uvMap, pModel);
       this.animationFrameId = requestAnimationFrame(this.drawMaskLoop);
@@ -131,8 +127,7 @@ export class AvatarView extends React.Component<{}, State> {
 
   private drawMaskLoop = () => {
     // get position of face
-    const positions = this.ctrack.getCurrentPosition();
-    // console.log(this.ctrack.getConvergence(), this.ctrack.getScore(), this.ctrack.getCurrentParameters())
+    const positions = this.clmWrapper.getCurrentPosition();
     clearOverlay(this.refs.overlay as HTMLCanvasElement);
     if (positions) {
       // draw mask on top of face
@@ -148,9 +143,7 @@ export class AvatarView extends React.Component<{}, State> {
     cancelAnimationFrame(this.animationFrameId);
     clearOverlay(this.refs.overlay as HTMLCanvasElement);
     this.faceDeformer.clear();
-    this.ctrack.stop();
-    this.ctrack.reset();
-    this.ctrack.start(this.refs.video);
+    this.clmWrapper.start(this.refs.video as HTMLVideoElement);
     this.drawGridLoop();
     this.setState({
       isTracking: false
@@ -158,8 +151,8 @@ export class AvatarView extends React.Component<{}, State> {
   }
 
 }
+
 export const clearOverlay = (overlay: HTMLCanvasElement) => {
-  // const overlay = this.refs.overlay as HTMLCanvasElement
   if (!overlay) {
     console.warn("no overlay");
     return;
