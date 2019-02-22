@@ -1,5 +1,5 @@
+import { pModel } from "./consts";
 const clm = require("../../clmtrackr/build/clmtrackr");
-const { pModel } = require("../../clmtrackr/models/model_pca_20_svm");
 
 export class ClmtrackrWrapper {
   private ctrack: any;

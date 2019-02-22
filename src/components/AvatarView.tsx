@@ -3,7 +3,7 @@ import "./AvatarView.css";
 import { Mask, MaskSelector, DEFAULT_MASKS } from "./Masks";
 import { DeviceSelector } from "./DeviceSelector";
 import { ClmtrackrWrapper } from "./ClmtrackrWrapper";
-const { pModel } = require("../../clmtrackr/models/model_pca_20_svm");
+import { pModel } from "./consts";
 
 declare const faceDeformer: any;
 
