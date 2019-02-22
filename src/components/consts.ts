@@ -1,7 +1,7 @@
 export const facemodel_numbering_new = require("../../clmtrackr/examples/media/facemodel_numbering_new.png");
 export const SNAP_SHOT_UV_MAP = [[7,85],[3,156],[11,216],[29,281],[61,334],[103,376],[154,408],[211,419],[269,406],[317,371],[358,326],[383,272],[399,204],[406,139],[397,75],[355,36],[320,12],[277,14],[239,38],[46,43],[80,19],[124,19],[161,40],[75,86],[109,68],[146,84],[111,96],[111,80],[327,80],[292,63],[257,83],[293,92],[293,76],[202,64],[163,156],[145,186],[160,204],[205,210],[248,203],[262,182],[244,153],[203,121],[174,195],[234,194],[131,275],[159,258],[188,250],[206,255],[225,250],[255,255],[281,271],[264,293],[241,311],[209,315],[174,312],[149,298],[169,284],[207,290],[247,282],[244,267],[206,269],[170,269],[204,179],[90,73],[132,74],[132,92],[91,94],[313,69],[271,68],[274,88],[313,87]];
-export const createSnapShotUVMap = (height: number) => {
-  return SNAP_SHOT_UV_MAP.map(pos => {
+export const createSnapShotUVMap = (uvMap: number[][], height: number) => {
+  return uvMap.map(pos => {
     return [
       pos[0] * height / 420,
       pos[1] * height / 420
@@ -48,6 +48,6 @@ export const DEFAULT_IMAEGS = [
   {
     name: "facemodel_numbering_new.png",
     path: facemodel_numbering_new,
-    uvMap: createSnapShotUVMap(720)
+    uvMap: createSnapShotUVMap(SNAP_SHOT_UV_MAP, 720)
   },
 ];

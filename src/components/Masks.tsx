@@ -1,5 +1,5 @@
 import * as React from "react";
-import { DEFAULT_IMAEGS, createSnapShotUVMap } from "./consts";
+import { DEFAULT_IMAEGS, createSnapShotUVMap, SNAP_SHOT_UV_MAP } from "./consts";
 
 export interface Mask {
   path: string,
@@ -27,11 +27,24 @@ const createMaskFromTemplate = async (path: string, name: string) => new Promise
       path,
       name,
       image: img,
-      uvMap: createSnapShotUVMap(img.height)
+      uvMap: createSnapShotUVMap(SNAP_SHOT_UV_MAP, img.height)
     });
   };
 });
 
+const createMaskFromUv = (path: string, name: string) => new Promise<Mask>(async res => {
+  const { uv } = await requestGet<{ uv: number[][]}>(`/uv?name=${name.replace(".png", "")}`);
+  const img = document.createElement("img");
+  img.src = path;
+  img.onload = () => {
+    res({
+      path,
+      name,
+      image: img,
+      uvMap: uv
+    });
+  };
+});
 
 export const DEFAULT_MASKS: Mask[] = DEFAULT_IMAEGS.map(({path, uvMap, name}) => createMask(path, name, uvMap));
 
@@ -53,9 +66,18 @@ export class MaskSelector extends React.Component<{
   }
 
   async componentWillMount() {
-    const { files } = await requestGetImages();
+    const { files: uvList } = await requestGet<{files: string[]}>("/uv-list");
+    const { files } = await requestGet<{files: string[]}>("/images");
+    const hasUvFiles = files.filter(file => {
+      const name = file.split(".png")[0];
+      return uvList.find(uvName => uvName.indexOf(name) > -1);
+    });
+    const notHasUvFiles = files.filter(file => hasUvFiles.indexOf(file) < 0);
     const masks = await Promise.all(
-      files.map(path => createMaskFromTemplate(`./files/${path}`, path))
+      [
+        ...hasUvFiles.map(path => createMaskFromUv(`./files/${path}`, path)),
+        ...notHasUvFiles.map(path => createMaskFromTemplate(`./files/${path}`, path)),
+      ]
     );
     const selectedMaskName = localStorage.getItem("last-saved-mask-name");
     const selectedMask = masks.find(mask => mask.name === selectedMaskName);
@@ -96,10 +118,10 @@ export class MaskSelector extends React.Component<{
   }
 }
 
-const requestGetImages = async () => {
-  return new Promise<{ files: string[] }>((res, rej) => {
+export function requestGet<T>(url: string) {
+  return new Promise<T>((res, rej) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("GET", "./images");
+    xhr.open("GET", url);
     xhr.responseType = "json";
     xhr.onload = () => {
       res(xhr.response);

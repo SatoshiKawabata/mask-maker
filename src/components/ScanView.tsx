@@ -118,7 +118,7 @@ export class ScanView extends React.Component<{}, {
     this.setState({
       uploadState: "uploading"
     });
-    const err = await requestPostImage(blob, fileName, "./images");
+    const err = await requestPostImage(blob, fileName, "/images");
     if (err) {
       window.alert("upload failed");
       this.setState({
@@ -132,7 +132,7 @@ export class ScanView extends React.Component<{}, {
   }
 }
 
-const requestPostImage = async (blob: Blob, fileName: string, url: string) => {
+export const requestPostImage = async (blob: Blob, fileName: string, url: string) => {
   const form = new FormData();
   form.append("image", blob, fileName);
   const xhr = new XMLHttpRequest();
@@ -155,7 +155,7 @@ const addZero = (num: number) => {
   return num + "";
 }
 
-const video2Canvas = (video: HTMLVideoElement, isReverse: boolean = false) => {
+export const video2Canvas = (video: HTMLVideoElement, isReverse: boolean = false) => {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext('2d');
   canvas.width = video.videoWidth;
@@ -168,7 +168,7 @@ const video2Canvas = (video: HTMLVideoElement, isReverse: boolean = false) => {
   return canvas;
 }
 
-const getNow = () => {
+export const getNow = () => {
   const d = new Date();
-  return `${d.getFullYear()}-${addZero(d.getMonth() + 1)}-${addZero(d.getDate())} ${addZero(d.getHours())}-${addZero(d.getMinutes())}-${addZero(d.getSeconds())}`;
+  return `${d.getFullYear()}-${addZero(d.getMonth() + 1)}-${addZero(d.getDate())}_${addZero(d.getHours())}-${addZero(d.getMinutes())}-${addZero(d.getSeconds())}`;
 }

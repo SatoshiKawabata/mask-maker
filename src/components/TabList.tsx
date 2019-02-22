@@ -2,6 +2,7 @@ import * as React from "react";
 import { ScanView } from "./ScanView";
 import { AvatarView } from "./AvatarView";
 import "./TabList.css";
+import { ScanFaceView } from "./ScanFaceView";
 
 const KEY_CODE = {
   LEFT: 37,
@@ -9,7 +10,7 @@ const KEY_CODE = {
 };
 
 export class Tablist extends React.Component<{}, {
-  view: "scan" | "avatar"
+  view: "scan" | "avatar" | "scan-face"
 }> {
   constructor(props: {}) {
     super(props);
@@ -47,20 +48,33 @@ export class Tablist extends React.Component<{}, {
             className="tab"
             disabled={this.state.view === "avatar"}
             onClick={() => this.onChangeTab("avatar")}>Avatar</button>
+          <button
+            className="tab"
+            disabled={this.state.view === "scan-face"}
+            onClick={() => this.onChangeTab("scan-face")}>Scan Face</button>
         </div>
         <div>
           {
-            this.state.view === "scan"
-              ? <ScanView />
-              : <AvatarView />
+            renderView(this.state.view)
           }
         </div>
       </div>
     );
   }
 
-  private readonly onChangeTab = (view: "scan" | "avatar") => {
+  private readonly onChangeTab = (view: "scan" | "avatar" | "scan-face") => {
     localStorage.setItem("tab-view", view);
     this.setState({ view });
+  }
+}
+
+const renderView = (view: "scan" | "avatar" | "scan-face") => {
+  switch (view) {
+    case "avatar":
+      return <AvatarView />;
+    case "scan":
+      return <ScanView />;
+    case "scan-face":
+      return <ScanFaceView />;
   }
 }

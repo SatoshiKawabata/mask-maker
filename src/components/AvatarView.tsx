@@ -110,7 +110,7 @@ export class AvatarView extends React.Component<{}, State> {
   private drawGridLoop = () => {
     const positions = this.ctrack.getCurrentPosition();
     const overlay = this.refs.overlay as HTMLCanvasElement
-    this.clearOverlay();
+    clearOverlay(this.refs.overlay as HTMLCanvasElement);
     if (positions) {
       // draw current grid
       this.ctrack.draw(overlay);
@@ -118,7 +118,7 @@ export class AvatarView extends React.Component<{}, State> {
     // check whether mask has converged
     const pn = this.ctrack.getConvergence();
     // console.log(pn, this.ctrack.getScore())
-    if (pn < 0.4) {
+    if (pn < 10) {
       this.faceDeformer.load(this.selectedMask.image, this.selectedMask.uvMap, pModel);
       this.animationFrameId = requestAnimationFrame(this.drawMaskLoop);
       this.setState({
@@ -133,7 +133,7 @@ export class AvatarView extends React.Component<{}, State> {
     // get position of face
     const positions = this.ctrack.getCurrentPosition();
     // console.log(this.ctrack.getConvergence(), this.ctrack.getScore(), this.ctrack.getCurrentParameters())
-    this.clearOverlay();
+    clearOverlay(this.refs.overlay as HTMLCanvasElement);
     if (positions) {
       // draw mask on top of face
       this.faceDeformer.draw(positions);
@@ -146,7 +146,7 @@ export class AvatarView extends React.Component<{}, State> {
 
   private restartTracking = () => {
     cancelAnimationFrame(this.animationFrameId);
-    this.clearOverlay();
+    clearOverlay(this.refs.overlay as HTMLCanvasElement);
     this.faceDeformer.clear();
     this.ctrack.stop();
     this.ctrack.reset();
@@ -157,12 +157,12 @@ export class AvatarView extends React.Component<{}, State> {
     });
   }
 
-  private clearOverlay = () => {
-    const overlay = this.refs.overlay as HTMLCanvasElement
-    if (!overlay) {
-      console.warn("no overlay");
-      return;
-    }
-    ((overlay).getContext("2d") as CanvasRenderingContext2D).clearRect(0, 0, overlay.width, overlay.height);
+}
+export const clearOverlay = (overlay: HTMLCanvasElement) => {
+  // const overlay = this.refs.overlay as HTMLCanvasElement
+  if (!overlay) {
+    console.warn("no overlay");
+    return;
   }
+  ((overlay).getContext("2d") as CanvasRenderingContext2D).clearRect(0, 0, overlay.width, overlay.height);
 }
