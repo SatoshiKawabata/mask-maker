@@ -4,9 +4,6 @@ import { Mask, MaskSelector, DEFAULT_MASKS } from "./Masks";
 import { DeviceSelector } from "./DeviceSelector";
 const clm = require("../../clmtrackr/build/clmtrackr");
 const { pModel } = require("../../clmtrackr/models/model_pca_20_svm");
-require("../../clmtrackr/examples/js/face_deformer")
-const webglUtils = require("../../clmtrackr/examples/js/libs/webgl-utils");
-Object.assign(window, webglUtils);
 
 declare const faceDeformer: any;
 
