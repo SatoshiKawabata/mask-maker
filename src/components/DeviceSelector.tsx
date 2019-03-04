@@ -27,8 +27,12 @@ export class DeviceSelector extends React.Component<P, {
           selectedDevice: selected
         });
 
-        const stream = await setUserMedia(this.props.cameraWidth, this.props.cameraHeight, selected.deviceId);
-        this.props.onChangeDevice({ stream, info: selected });
+        try {
+            const stream = await setUserMedia(this.props.cameraWidth, this.props.cameraHeight, selected.deviceId);
+            this.props.onChangeDevice({ stream, info: selected });
+        } catch (e) {
+            console.log(e);
+        }
     }
     render() {
         return <select onChange={this.onChange}>
