@@ -1,5 +1,6 @@
 import * as React from "react";
-import { DEFAULT_IMAEGS, createSnapShotUVMap, SNAP_SHOT_UV_MAP } from "./consts";
+import { DEFAULT_IMAEGS, createSnapShotUVMap, SNAP_SHOT_UV_MAP } from "../util/consts";
+import { ApiDelegate } from "../util/ApiDelegate";
 
 export interface Mask {
   path: string,
@@ -20,6 +21,7 @@ const createMask = (path: string, name: string, uvMap: number[][]): Mask => {
 };
 
 const createMaskFromTemplate = async (path: string, name: string) => new Promise<Mask>(res => {
+  console.log("createMaskFromTemplate path", path);
   const img = document.createElement("img");
   img.src = path;
   img.onload = () => {
@@ -33,7 +35,8 @@ const createMaskFromTemplate = async (path: string, name: string) => new Promise
 });
 
 const createMaskFromUv = (path: string, name: string) => new Promise<Mask>(async res => {
-  const { uv } = await requestGet<{ uv: number[][]}>(`/uv?name=${name.replace(".png", "")}`);
+  console.log("createMaskFromUv path", path);
+  const { uv } = await ApiDelegate.api.requestGet<{ uv: number[][]}>(`/uv?name=${name.replace(".png", "")}`);
   const img = document.createElement("img");
   img.src = path;
   img.onload = () => {
@@ -66,8 +69,8 @@ export class MaskSelector extends React.Component<{
   }
 
   async componentWillMount() {
-    const { files: uvList } = await requestGet<{files: string[]}>("/uv-list");
-    const { files } = await requestGet<{files: string[]}>("/images");
+    const { files: uvList } = await ApiDelegate.api.requestGet<{files: string[]}>("/uv-list");
+    const { files } = await ApiDelegate.api.requestGet<{files: string[]}>("/images");
     const hasUvFiles = files.filter(file => {
       const name = file.split(".png")[0];
       return uvList.find(uvName => uvName.indexOf(name) > -1);
@@ -117,18 +120,3 @@ export class MaskSelector extends React.Component<{
     return this.state.masks.find(mask => mask.path === path);
   }
 }
-
-export function requestGet<T>(url: string) {
-  return new Promise<T>((res, rej) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", url);
-    xhr.responseType = "json";
-    xhr.onload = () => {
-      res(xhr.response);
-    };
-    xhr.onerror = () => {
-      rej();
-    };
-    xhr.send();
-  })
-};

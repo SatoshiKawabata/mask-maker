@@ -1,8 +1,9 @@
 import * as React from "react";
 import { DeviceSelector } from "./DeviceSelector";
 import { clearOverlay } from "./AvatarView";
-import { getNow, video2Canvas, requestPostImage } from "./ScanView";
-import { ClmtrackrWrapper } from "./ClmtrackrWrapper";
+import { getNow, video2Canvas } from "./ScanView";
+import { ClmtrackrWrapper } from "../util/ClmtrackrWrapper";
+import { ApiDelegate } from "../util/ApiDelegate";
 
 interface State {
   zoom: number;
@@ -54,12 +55,12 @@ export class ScanFaceView extends React.Component<{}, State> {
         const positions = this.clmWrapper.getCurrentPosition();
         const canvas = await video2Canvas(this.refs.video as HTMLVideoElement, false);
         const name = getNow();
-        await requestPostJSON<{name: string, uv: number[][]}>({
+        await ApiDelegate.api.requestPostUV({
           name,
           uv: positions
-        }, "/uv");
+        });
         canvas.toBlob(async b => {
-          await requestPostImage(b, name, "/images");
+          await ApiDelegate.api.requestPostImage(b, name);
           this.setState({
             isSaving: false,
             fileName: name
@@ -114,17 +115,3 @@ export class ScanFaceView extends React.Component<{}, State> {
   }
 }
 
-function requestPostJSON<T>(json: T, url: string) {
-  const xhr = new XMLHttpRequest();
-  xhr.open("POST", url, true);
-  xhr.setRequestHeader("Content-Type", "application/json");
-  xhr.send(JSON.stringify(json));
-  return new Promise((res, rej) => {
-    xhr.onload = () => {
-      res();
-    };
-    xhr.onerror = () => {
-      res("error");
-    };
-  });
-};
