@@ -40,8 +40,8 @@ module.exports = {
     ],
   },
   devServer: {
-      before: server,
-      contentBase: "./build",
+      // before: server,
+      contentBase: "./docs",
       port: "1234"
   },
   devtool: 'inline-source-map'

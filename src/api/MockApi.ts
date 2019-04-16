@@ -3,12 +3,14 @@ import { IApi, PostUvData } from "./IApi";
 interface MockData {
   images: string[];
   uvs: {name: string, uv: number[][]}[];
+  files: string[];
 }
 
 export class MockApi implements IApi {
   private readonly mockData: MockData = {
     images: [],
-    uvs: []
+    uvs: [],
+    files: []
   };
 
   requestPostImage(blob: Blob, fileName: string) {
@@ -32,7 +34,7 @@ export class MockApi implements IApi {
     } else if (url.indexOf("/uv-list") > -1) {
       response = this.mockData.uvs.map(uv => uv.name);
     } else if (url.indexOf("/images") > -1) {
-      response = this.mockData.images;
+      response = { images: this.mockData.images, files: this.mockData.files };
     }
     return new Promise<T>(res => res(JSON.parse(JSON.stringify(response))));
   }
