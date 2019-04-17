@@ -1,5 +1,6 @@
 import * as React from "react";
-import { DEFAULT_IMAEGS, createSnapShotUVMap, SNAP_SHOT_UV_MAP } from "./consts";
+import { DEFAULT_IMAEGS, createSnapShotUVMap, SNAP_SHOT_UV_MAP } from "../util/consts";
+import { ApiDelegate } from "../util/ApiDelegate";
 
 export interface Mask {
   path: string,
@@ -19,27 +20,29 @@ const createMask = (path: string, name: string, uvMap: number[][]): Mask => {
   };
 };
 
-const createMaskFromTemplate = async (path: string, name: string) => new Promise<Mask>(res => {
+const createMaskFromTemplate = async (fileName: string) => new Promise<Mask>(res => {
   const img = document.createElement("img");
+  const path = ApiDelegate.api.getImageSrc(fileName);
   img.src = path;
   img.onload = () => {
     res({
       path,
-      name,
+      name: fileName,
       image: img,
       uvMap: createSnapShotUVMap(SNAP_SHOT_UV_MAP, img.height)
     });
   };
 });
 
-const createMaskFromUv = (path: string, name: string) => new Promise<Mask>(async res => {
-  const { uv } = await requestGet<{ uv: number[][]}>(`/uv?name=${name.replace(".png", "")}`);
+const createMaskFromUv = (fileName: string) => new Promise<Mask>(async res => {
+  const { uv } = await ApiDelegate.api.requestGet<{ uv: number[][]}>(`/uv?name=${fileName.replace(".png", "")}`);
   const img = document.createElement("img");
+  const path = ApiDelegate.api.getImageSrc(fileName);
   img.src = path;
   img.onload = () => {
     res({
       path,
-      name,
+      name: fileName,
       image: img,
       uvMap: uv
     });
@@ -66,8 +69,8 @@ export class MaskSelector extends React.Component<{
   }
 
   async componentWillMount() {
-    const { files: uvList } = await requestGet<{files: string[]}>("/uv-list");
-    const { files } = await requestGet<{files: string[]}>("/images");
+    const { files: uvList } = await ApiDelegate.api.requestGet<{files: string[]}>("/uv-list");
+    const { files } = await ApiDelegate.api.requestGet<{files: string[]}>("/images");
     const hasUvFiles = files.filter(file => {
       const name = file.split(".png")[0];
       return uvList.find(uvName => uvName.indexOf(name) > -1);
@@ -75,8 +78,8 @@ export class MaskSelector extends React.Component<{
     const notHasUvFiles = files.filter(file => hasUvFiles.indexOf(file) < 0);
     const masks = await Promise.all(
       [
-        ...hasUvFiles.map(path => createMaskFromUv(`./files/${path}`, path)),
-        ...notHasUvFiles.map(path => createMaskFromTemplate(`./files/${path}`, path)),
+        ...hasUvFiles.map(file => createMaskFromUv(file)),
+        ...notHasUvFiles.map(file => createMaskFromTemplate(file)),
       ]
     );
     const selectedMaskName = localStorage.getItem("last-saved-mask-name");
@@ -117,18 +120,3 @@ export class MaskSelector extends React.Component<{
     return this.state.masks.find(mask => mask.path === path);
   }
 }
-
-export function requestGet<T>(url: string) {
-  return new Promise<T>((res, rej) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", url);
-    xhr.responseType = "json";
-    xhr.onload = () => {
-      res(xhr.response);
-    };
-    xhr.onerror = () => {
-      rej();
-    };
-    xhr.send();
-  })
-};

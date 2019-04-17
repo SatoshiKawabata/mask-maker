@@ -6,7 +6,7 @@ module.exports = {
   mode: 'development',
 
   // メインとなるJavaScriptファイル（エントリーポイント）
-  entry: './src/index.tsx',
+  entry: process.env.MOCK ? './src/mock.tsx' : './src/index.tsx',
   // ファイルの出力設定
   output: {
     //  出力ファイルのディレクトリ名
@@ -40,7 +40,7 @@ module.exports = {
     ],
   },
   devServer: {
-      before: server,
+      before: process.env.MOCK ? null : server,
       contentBase: "./build",
       port: "1234"
   },

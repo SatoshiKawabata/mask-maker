@@ -2,8 +2,8 @@ import * as React from "react";
 import "./AvatarView.css";
 import { Mask, MaskSelector, DEFAULT_MASKS } from "./Masks";
 import { DeviceSelector } from "./DeviceSelector";
-import { ClmtrackrWrapper } from "./ClmtrackrWrapper";
-import { pModel } from "./consts";
+import { ClmtrackrWrapper } from "../util/ClmtrackrWrapper";
+import { pModel } from "../util/consts";
 
 declare const faceDeformer: any;
 

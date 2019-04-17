@@ -1,7 +1,8 @@
 import * as React from "react";
 import "./ScanView.css";
-import { facemodel_numbering_new } from "./consts";
+import { facemodel_numbering_new } from "../util/consts";
 import { DeviceSelector } from "./DeviceSelector";
+import { ApiDelegate } from "../util/ApiDelegate";
 
 export class ScanView extends React.Component<{}, {
   snapshotSrc: string,
@@ -118,7 +119,7 @@ export class ScanView extends React.Component<{}, {
     this.setState({
       uploadState: "uploading"
     });
-    const err = await requestPostImage(blob, fileName, "/images");
+    const err = await ApiDelegate.api.requestPostImage(blob, fileName);
     if (err) {
       window.alert("upload failed");
       this.setState({
@@ -131,22 +132,6 @@ export class ScanView extends React.Component<{}, {
     }
   }
 }
-
-export const requestPostImage = async (blob: Blob, fileName: string, url: string) => {
-  const form = new FormData();
-  form.append("image", blob, fileName);
-  const xhr = new XMLHttpRequest();
-  xhr.open("POST", url, true);
-  xhr.send(form);
-  return new Promise((res, rej) => {
-    xhr.onload = () => {
-      res();
-    };
-    xhr.onerror = () => {
-      res("error");
-    };
-  })
-};
 
 const addZero = (num: number) => {
   if (num < 10) {
