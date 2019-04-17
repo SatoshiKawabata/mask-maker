@@ -13,33 +13,33 @@ const KEY_CODE = {
 };
 
 export class Tablist extends React.Component<{}, {
-  view: "avatar"
+  view: "scan" | "avatar" | "scan-face"
 }> {
   constructor(props: {}) {
     super(props);
     this.state = {
-      view: "avatar"
+      view: localStorage.getItem("tab-view") as "scan" | "avatar" || "scan-face"
     };
   }
 
   componentDidMount() {
     window.addEventListener("keydown", e => {
       switch (e.keyCode) {
-        // case KEY_CODE.ONE:
-        //   e.stopPropagation();
-        //   e.preventDefault();
-        //   this.setState({ view: "scan" });
-        // break;
+        case KEY_CODE.ONE:
+          e.stopPropagation();
+          e.preventDefault();
+          this.setState({ view: "scan" });
+        break;
         case KEY_CODE.TWO:
           e.stopPropagation();
           e.preventDefault();
           this.setState({ view: "avatar" });
           break;
-        // case KEY_CODE.THREE:
-        //   e.stopPropagation();
-        //   e.preventDefault();
-        //   this.setState({ view: "scan-face" });
-        //   break;
+        case KEY_CODE.THREE:
+          e.stopPropagation();
+          e.preventDefault();
+          this.setState({ view: "scan-face" });
+          break;
       }
     });
   }
@@ -47,7 +47,7 @@ export class Tablist extends React.Component<{}, {
   render() {
     return (
       <div>
-        {/* <div className="tab-list">
+        <div className="tab-list">
           <button
             className="tab"
             disabled={this.state.view === "scan"}
@@ -60,7 +60,7 @@ export class Tablist extends React.Component<{}, {
             className="tab"
             disabled={this.state.view === "scan-face"}
             onClick={() => this.onChangeTab("scan-face")}>Scan Face</button>
-        </div> */}
+        </div>
         <div>
           {
             renderView(this.state.view)
@@ -70,10 +70,10 @@ export class Tablist extends React.Component<{}, {
     );
   }
 
-  // private readonly onChangeTab = (view: "scan" | "avatar" | "scan-face") => {
-  //   localStorage.setItem("tab-view", view);
-  //   this.setState({ view });
-  // }
+  private readonly onChangeTab = (view: "scan" | "avatar" | "scan-face") => {
+    localStorage.setItem("tab-view", view);
+    this.setState({ view });
+  }
 }
 
 const renderView = (view: "scan" | "avatar" | "scan-face") => {

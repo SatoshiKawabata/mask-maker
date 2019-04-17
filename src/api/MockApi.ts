@@ -16,12 +16,15 @@ export class MockApi implements IApi {
   requestPostImage(blob: Blob, fileName: string) {
     const blobUrl = URL.createObjectURL(blob);
     this.mockData.images.push(blobUrl);
+    this.mockData.files.push(fileName);
+    console.log(this.mockData);
 
     return new Promise(res => res());
   };
 
   requestPostUV(json: PostUvData) {
     this.mockData.uvs.push(json);
+    console.log(this.mockData);
     return new Promise(res => res());
   };
 
