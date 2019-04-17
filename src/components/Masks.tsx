@@ -20,29 +20,29 @@ const createMask = (path: string, name: string, uvMap: number[][]): Mask => {
   };
 };
 
-const createMaskFromTemplate = async (path: string, name: string) => new Promise<Mask>(res => {
-  console.log("createMaskFromTemplate path", path);
+const createMaskFromTemplate = async (fileName: string) => new Promise<Mask>(res => {
   const img = document.createElement("img");
+  const path = ApiDelegate.api.getImageSrc(fileName);
   img.src = path;
   img.onload = () => {
     res({
       path,
-      name,
+      name: fileName,
       image: img,
       uvMap: createSnapShotUVMap(SNAP_SHOT_UV_MAP, img.height)
     });
   };
 });
 
-const createMaskFromUv = (path: string, name: string) => new Promise<Mask>(async res => {
-  console.log("createMaskFromUv path", path);
-  const { uv } = await ApiDelegate.api.requestGet<{ uv: number[][]}>(`/uv?name=${name.replace(".png", "")}`);
+const createMaskFromUv = (fileName: string) => new Promise<Mask>(async res => {
+  const { uv } = await ApiDelegate.api.requestGet<{ uv: number[][]}>(`/uv?name=${fileName.replace(".png", "")}`);
   const img = document.createElement("img");
+  const path = ApiDelegate.api.getImageSrc(fileName);
   img.src = path;
   img.onload = () => {
     res({
       path,
-      name,
+      name: fileName,
       image: img,
       uvMap: uv
     });
@@ -78,8 +78,8 @@ export class MaskSelector extends React.Component<{
     const notHasUvFiles = files.filter(file => hasUvFiles.indexOf(file) < 0);
     const masks = await Promise.all(
       [
-        ...hasUvFiles.map(path => createMaskFromUv(`./files/${path}`, path)),
-        ...notHasUvFiles.map(path => createMaskFromTemplate(`./files/${path}`, path)),
+        ...hasUvFiles.map(file => createMaskFromUv(file)),
+        ...notHasUvFiles.map(file => createMaskFromTemplate(file)),
       ]
     );
     const selectedMaskName = localStorage.getItem("last-saved-mask-name");

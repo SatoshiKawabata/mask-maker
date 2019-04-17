@@ -47,4 +47,7 @@ export class Api implements IApi {
     })
   };
 
+  getImageSrc(path: string) {
+    return `./files/${path}`;
+  }
 }
