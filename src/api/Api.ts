@@ -14,8 +14,8 @@ export class Api implements IApi {
       xhr.onerror = () => {
         res("error");
       };
-    })
-  };
+    });
+  }
 
   requestPostUV(json: PostUvData) {
     const xhr = new XMLHttpRequest();
@@ -30,7 +30,7 @@ export class Api implements IApi {
         res("error");
       };
     });
-  };
+  }
 
   requestGet<T>(url: string) {
     return new Promise<T>((res, rej) => {
@@ -44,8 +44,8 @@ export class Api implements IApi {
         rej();
       };
       xhr.send();
-    })
-  };
+    });
+  }
 
   getImageSrc(path: string) {
     return `./files/${path}`;

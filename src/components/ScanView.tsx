@@ -4,13 +4,16 @@ import { facemodel_numbering_new } from "../util/consts";
 import { DeviceSelector } from "./DeviceSelector";
 import { ApiDelegate } from "../util/ApiDelegate";
 
-export class ScanView extends React.Component<{}, {
-  snapshotSrc: string,
-  snapshotName: string,
-  snapshotBlob: Blob,
-  uploadState: "none" | "uploading" | "success" | "failed",
-  isVideoReverse: boolean
-}> {
+export class ScanView extends React.Component<
+  {},
+  {
+    snapshotSrc: string;
+    snapshotName: string;
+    snapshotBlob: Blob;
+    uploadState: "none" | "uploading" | "success" | "failed";
+    isVideoReverse: boolean;
+  }
+> {
   constructor(props: {}) {
     super(props);
     this.state = {
@@ -34,46 +37,75 @@ export class ScanView extends React.Component<{}, {
             try {
               (this.refs.video as HTMLVideoElement).srcObject = stream;
             } catch {
-              (this.refs.video as HTMLVideoElement).src = URL.createObjectURL(stream);
+              (this.refs.video as HTMLVideoElement).src = URL.createObjectURL(
+                stream
+              );
             }
-          }} />
+          }}
+        />
         <input
           type="checkbox"
           name=""
           id="is-video-reverse"
           checked={this.state.isVideoReverse}
-          onChange={() => this.setState({ isVideoReverse: !this.state.isVideoReverse })} />
+          onChange={() =>
+            this.setState({ isVideoReverse: !this.state.isVideoReverse })
+          }
+        />
         <label htmlFor="is-video-reverse">Reverse</label>
         <div className="scan-view__container">
           <video
-            className={this.state.isVideoReverse ? "scan-view__video--reverse" : ""}
+            className={
+              this.state.isVideoReverse ? "scan-view__video--reverse" : ""
+            }
             onCanPlay={this.onVideoCanPlay}
             ref="video"
-            autoPlay />
-          <img className="scan-view__template" src={facemodel_numbering_new} ref="template"/>
+            autoPlay
+          />
+          <img
+            className="scan-view__template"
+            src={facemodel_numbering_new}
+            ref="template"
+          />
         </div>
-        <button type="button" onClick={this.onClickSnapShotAndSave}>SnapShotAndSave</button>
-        <button type="button" onClick={this.onClickSnapShot}>SnapShot</button>
-        {
-          this.state.snapshotSrc
-            ? <div>
-                <input
-                  className="scan-view__snapshot-name"
-                  type="text"
-                  value={this.state.snapshotName}
-                  onInput={e => this.setState({ snapshotName: (e.target as HTMLInputElement).value }) }
-                  list="snapshotNames"
-                  autoComplete="on"/>
-                <datalist id="snapshotNames">
-                  {
-                    JSON.parse(localStorage.getItem("snapshot-names") || "[]").map((val: string) => <option value={val} key={val} />)
-                  }
-                </datalist>
-                <button type="button" onClick={this.onClickSave} disabled={!this.state.snapshotBlob || !this.state.snapshotName}>Save</button>
-                <p>upload state: {this.state.uploadState}</p>
-                <img src={this.state.snapshotSrc} />
-              </div> : null
-        }
+        <button type="button" onClick={this.onClickSnapShotAndSave}>
+          撮影して保存する
+        </button>
+        <button type="button" onClick={this.onClickSnapShot}>
+          撮影する
+        </button>
+        {this.state.snapshotSrc ? (
+          <div>
+            <input
+              className="scan-view__snapshot-name"
+              type="text"
+              value={this.state.snapshotName}
+              onInput={e =>
+                this.setState({
+                  snapshotName: (e.target as HTMLInputElement).value
+                })
+              }
+              list="snapshotNames"
+              autoComplete="on"
+            />
+            <datalist id="snapshotNames">
+              {JSON.parse(localStorage.getItem("snapshot-names") || "[]").map(
+                (val: string) => (
+                  <option value={val} key={val} />
+                )
+              )}
+            </datalist>
+            <button
+              type="button"
+              onClick={this.onClickSave}
+              disabled={!this.state.snapshotBlob || !this.state.snapshotName}
+            >
+              Save
+            </button>
+            <p>upload state: {this.state.uploadState}</p>
+            <img src={this.state.snapshotSrc} />
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -84,27 +116,31 @@ export class ScanView extends React.Component<{}, {
       snapshotName: getNow()
     });
     await this.save(this.state.snapshotBlob, this.state.snapshotName);
-    localStorage.setItem("last-saved-mask-name", this.state.snapshotName + ".png");
-  }
+    localStorage.setItem(
+      "last-saved-mask-name",
+      this.state.snapshotName + ".png"
+    );
+  };
 
   private onClickSnapShot = async () => {
     const blob = await this.createBlob();
     this.setState({ snapshotBlob: blob });
-  }
+  };
 
   private createBlob = () => {
     const video = this.refs.video as HTMLVideoElement;
     const canvas = video2Canvas(video, this.state.isVideoReverse);
     this.setState({
-      snapshotSrc: canvas.toDataURL('image/png'),
+      snapshotSrc: canvas.toDataURL("image/png"),
       uploadState: "none"
     });
     return new Promise<Blob>(resolve => canvas.toBlob(resolve));
-  }
+  };
 
   private onVideoCanPlay = () => {
-    (this.refs.template as HTMLImageElement).height = (this.refs.video as HTMLVideoElement).videoHeight;
-  }
+    (this.refs.template as HTMLImageElement).height = (this.refs
+      .video as HTMLVideoElement).videoHeight;
+  };
 
   private onClickSave = async () => {
     await this.save(this.state.snapshotBlob, this.state.snapshotName);
@@ -113,7 +149,7 @@ export class ScanView extends React.Component<{}, {
     names.push(this.state.snapshotName);
     names.sort();
     localStorage.setItem("snapshot-names", JSON.stringify(names));
-  }
+  };
 
   private save = async (blob: Blob, fileName: string) => {
     this.setState({
@@ -130,7 +166,7 @@ export class ScanView extends React.Component<{}, {
         uploadState: "success"
       });
     }
-  }
+  };
 }
 
 const addZero = (num: number) => {
@@ -138,22 +174,29 @@ const addZero = (num: number) => {
     return `0${num}`;
   }
   return num + "";
-}
+};
 
-export const video2Canvas = (video: HTMLVideoElement, isReverse: boolean = false) => {
+export const video2Canvas = (
+  video: HTMLVideoElement,
+  isReverse: boolean = false
+) => {
   const canvas = document.createElement("canvas");
-  const context = canvas.getContext('2d');
+  const context = canvas.getContext("2d");
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
   if (isReverse) {
-    context.translate(canvas.width,0);
-    context.scale(-1,1);
+    context.translate(canvas.width, 0);
+    context.scale(-1, 1);
   }
   context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
   return canvas;
-}
+};
 
 export const getNow = () => {
   const d = new Date();
-  return `${d.getFullYear()}-${addZero(d.getMonth() + 1)}-${addZero(d.getDate())}_${addZero(d.getHours())}-${addZero(d.getMinutes())}-${addZero(d.getSeconds())}`;
-}
+  return `${d.getFullYear()}-${addZero(d.getMonth() + 1)}-${addZero(
+    d.getDate()
+  )}_${addZero(d.getHours())}-${addZero(d.getMinutes())}-${addZero(
+    d.getSeconds()
+  )}`;
+};

@@ -1,8 +1,8 @@
 import { IApi, PostUvData } from "./IApi";
 
 interface MockData {
-  images: Map <string, string>;
-  uvs: {name: string, uv: number[][]}[];
+  images: Map<string, string>;
+  uvs: { name: string; uv: number[][] }[];
   files: string[];
 }
 
@@ -19,12 +19,12 @@ export class MockApi implements IApi {
     this.mockData.files.push(fileName);
 
     return new Promise(res => res());
-  };
+  }
 
   requestPostUV(json: PostUvData) {
     this.mockData.uvs.push(json);
     return new Promise(res => res());
-  };
+  }
 
   requestGet<T>(url: string) {
     let response: any = null;

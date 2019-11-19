@@ -12,13 +12,17 @@ const KEY_CODE = {
   THREE: 51
 };
 
-export class Tablist extends React.Component<{}, {
-  view: "scan" | "avatar" | "scan-face"
-}> {
+export class Tablist extends React.Component<
+  {},
+  {
+    view: "scan" | "avatar" | "scan-face";
+  }
+> {
   constructor(props: {}) {
     super(props);
     this.state = {
-      view: localStorage.getItem("tab-view") as "scan" | "avatar" || "scan-face"
+      view:
+        (localStorage.getItem("tab-view") as "scan" | "avatar") || "scan-face"
     };
   }
 
@@ -29,7 +33,7 @@ export class Tablist extends React.Component<{}, {
           e.stopPropagation();
           e.preventDefault();
           this.setState({ view: "scan" });
-        break;
+          break;
         case KEY_CODE.TWO:
           e.stopPropagation();
           e.preventDefault();
@@ -51,21 +55,26 @@ export class Tablist extends React.Component<{}, {
           <button
             className="tab"
             disabled={this.state.view === "scan"}
-            onClick={() => this.onChangeTab("scan")}>Scan</button>
+            onClick={() => this.onChangeTab("scan")}
+          >
+            顔の絵を読み取る
+          </button>
           <button
             className="tab"
             disabled={this.state.view === "avatar"}
-            onClick={() => this.onChangeTab("avatar")}>Avatar</button>
+            onClick={() => this.onChangeTab("avatar")}
+          >
+            カメラ
+          </button>
           <button
             className="tab"
             disabled={this.state.view === "scan-face"}
-            onClick={() => this.onChangeTab("scan-face")}>Scan Face</button>
+            onClick={() => this.onChangeTab("scan-face")}
+          >
+            顔を読み取る
+          </button>
         </div>
-        <div>
-          {
-            renderView(this.state.view)
-          }
-        </div>
+        <div>{renderView(this.state.view)}</div>
       </div>
     );
   }
@@ -73,7 +82,7 @@ export class Tablist extends React.Component<{}, {
   private readonly onChangeTab = (view: "scan" | "avatar" | "scan-face") => {
     localStorage.setItem("tab-view", view);
     this.setState({ view });
-  }
+  };
 }
 
 const renderView = (view: "scan" | "avatar" | "scan-face") => {
@@ -85,4 +94,4 @@ const renderView = (view: "scan" | "avatar" | "scan-face") => {
     case "scan-face":
       return <ScanFaceView />;
   }
-}
+};

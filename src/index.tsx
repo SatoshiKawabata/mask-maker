@@ -5,7 +5,4 @@ import { ApiDelegate } from "./util/ApiDelegate";
 import { Api } from "./api/api";
 ApiDelegate.api = new Api();
 
-
-ReactDOM.render(
-  <Tablist />,
-document.getElementById('app'));
+ReactDOM.render(<Tablist />, document.getElementById("app"));

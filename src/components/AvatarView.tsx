@@ -39,8 +39,15 @@ export class AvatarView extends React.Component<{}, State> {
   }
 
   componentDidMount() {
-    const webGLContext = (this.refs.webgl as HTMLCanvasElement).getContext("webgl");
-    webGLContext.viewport(0, 0, webGLContext.canvas.width, webGLContext.canvas.height);
+    const webGLContext = (this.refs.webgl as HTMLCanvasElement).getContext(
+      "webgl"
+    );
+    webGLContext.viewport(
+      0,
+      0,
+      webGLContext.canvas.width,
+      webGLContext.canvas.height
+    );
     this.faceDeformer.init(this.refs.webgl);
   }
 
@@ -54,7 +61,9 @@ export class AvatarView extends React.Component<{}, State> {
   render() {
     return (
       <div>
-        <button type="button" onClick={this.restartTracking}>restart</button>
+        <button type="button" onClick={this.restartTracking}>
+          顔を再トラッキングする
+        </button>
         <DeviceSelector
           defaultId={localStorage.getItem("avatar-view-camera-device-id")}
           cameraWidth={400}
@@ -64,18 +73,38 @@ export class AvatarView extends React.Component<{}, State> {
             try {
               (this.refs.video as HTMLVideoElement).srcObject = stream;
             } catch {
-              (this.refs.video as HTMLVideoElement).src = URL.createObjectURL(stream);
+              (this.refs.video as HTMLVideoElement).src = URL.createObjectURL(
+                stream
+              );
             }
-          }} />
-        <MaskSelector onChange={mask => {
-          this.selectedMask = mask;
-          this.faceDeformer.load(mask.image, mask.uvMap, pModel);
-        }} selectedMask={this.selectedMask}/>
-        <input type="button" value="+" onClick={() => this.setState({ zoom: this.state.zoom + 0.05 })} />
-        <input type="button" value="-" onClick={() => this.setState({ zoom: this.state.zoom - 0.05 })} />
-        <span>zoom: {this.state.zoom}</span>
-        <span style={{marginLeft: "16px"}}>isTtacking: {this.state.isTracking.toString()}</span>
-        <div id="container" className="avatar-view__container" style={{transform: `scale(${this.state.zoom})`}}>
+          }}
+        />
+        <MaskSelector
+          onChange={mask => {
+            this.selectedMask = mask;
+            this.faceDeformer.load(mask.image, mask.uvMap, pModel);
+          }}
+          selectedMask={this.selectedMask}
+        />
+        <input
+          type="button"
+          value="+"
+          onClick={() => this.setState({ zoom: this.state.zoom + 0.05 })}
+        />
+        <input
+          type="button"
+          value="-"
+          onClick={() => this.setState({ zoom: this.state.zoom - 0.05 })}
+        />
+        <span>ズーム: {this.state.zoom}</span>
+        <span style={{ marginLeft: "16px" }}>
+          顔をトラッキング中: {this.state.isTracking.toString()}
+        </span>
+        <div
+          id="container"
+          className="avatar-view__container"
+          style={{ transform: `scale(${this.state.zoom})` }}
+        >
           <video
             className="avatar-view__video"
             ref="video"
@@ -85,15 +114,22 @@ export class AvatarView extends React.Component<{}, State> {
             playsInline={true}
             autoPlay={true}
             onCanPlay={this.onReadyVideo}
-            >
-          </video>
-          <canvas ref="overlay" className="avatar-view__overlay" width="400" height="300"></canvas>
-          <canvas ref="webgl" className="avatar-view__webgl" width="400" height="300"></canvas>
-          {
-            this.state.isTracking
-              ? null
-              : <p className="avatar-view__note">Don't move!</p>
-          }
+          ></video>
+          <canvas
+            ref="overlay"
+            className="avatar-view__overlay"
+            width="400"
+            height="300"
+          ></canvas>
+          <canvas
+            ref="webgl"
+            className="avatar-view__webgl"
+            width="400"
+            height="300"
+          ></canvas>
+          <p className="avatar-view__note">顔をトラッキング中です...</p>
+          {/* {this.state.isTracking ? null : (
+          )} */}
         </div>
       </div>
     );
@@ -102,11 +138,11 @@ export class AvatarView extends React.Component<{}, State> {
   private onReadyVideo = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     this.clmWrapper.start(this.refs.video as HTMLVideoElement);
     this.drawGridLoop();
-  }
+  };
 
   private drawGridLoop = () => {
     const positions = this.clmWrapper.getCurrentPosition();
-    const overlay = this.refs.overlay as HTMLCanvasElement
+    const overlay = this.refs.overlay as HTMLCanvasElement;
     clearOverlay(this.refs.overlay as HTMLCanvasElement);
     if (positions) {
       // draw current grid
@@ -115,7 +151,11 @@ export class AvatarView extends React.Component<{}, State> {
     // check whether mask has converged
     const pn = this.clmWrapper.getConvergence();
     if (pn < 10) {
-      this.faceDeformer.load(this.selectedMask.image, this.selectedMask.uvMap, pModel);
+      this.faceDeformer.load(
+        this.selectedMask.image,
+        this.selectedMask.uvMap,
+        pModel
+      );
       this.animationFrameId = requestAnimationFrame(this.drawMaskLoop);
       this.setState({
         isTracking: false
@@ -123,7 +163,7 @@ export class AvatarView extends React.Component<{}, State> {
     } else {
       this.animationFrameId = requestAnimationFrame(this.drawGridLoop);
     }
-  }
+  };
 
   private drawMaskLoop = () => {
     // get position of face
@@ -137,7 +177,7 @@ export class AvatarView extends React.Component<{}, State> {
       });
     }
     this.animationFrameId = requestAnimationFrame(this.drawMaskLoop);
-  }
+  };
 
   private restartTracking = () => {
     cancelAnimationFrame(this.animationFrameId);
@@ -148,8 +188,7 @@ export class AvatarView extends React.Component<{}, State> {
     this.setState({
       isTracking: false
     });
-  }
-
+  };
 }
 
 export const clearOverlay = (overlay: HTMLCanvasElement) => {
@@ -157,5 +196,10 @@ export const clearOverlay = (overlay: HTMLCanvasElement) => {
     console.warn("no overlay");
     return;
   }
-  ((overlay).getContext("2d") as CanvasRenderingContext2D).clearRect(0, 0, overlay.width, overlay.height);
-}
+  (overlay.getContext("2d") as CanvasRenderingContext2D).clearRect(
+    0,
+    0,
+    overlay.width,
+    overlay.height
+  );
+};

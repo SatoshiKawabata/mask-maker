@@ -5,7 +5,4 @@ import { ApiDelegate } from "./util/ApiDelegate";
 import { MockApi } from "./api/MockApi";
 ApiDelegate.api = new MockApi();
 
-
-ReactDOM.render(
-  <Tablist />,
-document.getElementById('app'));
+ReactDOM.render(<Tablist />, document.getElementById("app"));

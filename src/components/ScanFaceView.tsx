@@ -26,8 +26,15 @@ export class ScanFaceView extends React.Component<{}, State> {
   }
 
   componentDidMount() {
-    const webGLContext = (this.refs.webgl as HTMLCanvasElement).getContext("webgl");
-    webGLContext.viewport(0, 0, webGLContext.canvas.width, webGLContext.canvas.height);
+    const webGLContext = (this.refs.webgl as HTMLCanvasElement).getContext(
+      "webgl"
+    );
+    webGLContext.viewport(
+      0,
+      0,
+      webGLContext.canvas.width,
+      webGLContext.canvas.height
+    );
   }
 
   componentWillUnmount() {
@@ -36,82 +43,105 @@ export class ScanFaceView extends React.Component<{}, State> {
   }
 
   render() {
-    return <div>
-      <button type="button" onClick={this.restartTracking}>restart</button>
-      <DeviceSelector
-        defaultId={localStorage.getItem("avatar-view-camera-device-id")}
-        cameraWidth={400}
-        cameraHeight={300}
-        onChangeDevice={({ stream, info }) => {
-          localStorage.setItem("avatar-view-camera-device-id", info.deviceId);
-          try {
-            (this.refs.video as HTMLVideoElement).srcObject = stream;
-          } catch {
-            (this.refs.video as HTMLVideoElement).src = URL.createObjectURL(stream);
-          }
-        }} />
-      <button onClick={async () => {
-        this.setState({ isSaving: true });
-        const positions = this.clmWrapper.getCurrentPosition();
-        const canvas = await video2Canvas(this.refs.video as HTMLVideoElement, false);
-        const name = getNow();
-        await ApiDelegate.api.requestPostUV({
-          name,
-          uv: positions
-        });
-        canvas.toBlob(async b => {
-          await ApiDelegate.api.requestPostImage(b, name);
-          this.setState({
-            isSaving: false,
-            fileName: name
-          });
-          localStorage.setItem("last-saved-mask-name", name + ".png");
-        });
-      }} disabled={this.state.isSaving}>save</button>
-      {
-        this.state.fileName
-          ? <span>{this.state.fileName}</span>
-          : null
-      }
-      <div id="container" className="avatar-view__container" style={{transform: `scale(${this.state.zoom})`}}>
-        <video
-          className="avatar-view__video"
-          ref="video"
-          width="400"
-          height="300"
-          preload="auto"
-          playsInline={true}
-          autoPlay={true}
-          onCanPlay={this.onReadyVideo}
-          >
-        </video>
-        <canvas ref="overlay" className="avatar-view__overlay" width="400" height="300"></canvas>
-        <canvas ref="webgl" className="avatar-view__webgl" width="400" height="300"></canvas>
+    return (
+      <div>
+        <button type="button" onClick={this.restartTracking}>
+          再トラッキングする
+        </button>
+        <DeviceSelector
+          defaultId={localStorage.getItem("avatar-view-camera-device-id")}
+          cameraWidth={400}
+          cameraHeight={300}
+          onChangeDevice={({ stream, info }) => {
+            localStorage.setItem("avatar-view-camera-device-id", info.deviceId);
+            try {
+              (this.refs.video as HTMLVideoElement).srcObject = stream;
+            } catch {
+              (this.refs.video as HTMLVideoElement).src = URL.createObjectURL(
+                stream
+              );
+            }
+          }}
+        />
+        <button
+          onClick={async () => {
+            this.setState({ isSaving: true });
+            const positions = this.clmWrapper.getCurrentPosition();
+            const canvas = await video2Canvas(
+              this.refs.video as HTMLVideoElement,
+              false
+            );
+            const name = getNow();
+            await ApiDelegate.api.requestPostUV({
+              name,
+              uv: positions
+            });
+            canvas.toBlob(async b => {
+              await ApiDelegate.api.requestPostImage(b, name);
+              this.setState({
+                isSaving: false,
+                fileName: name
+              });
+              localStorage.setItem("last-saved-mask-name", name + ".png");
+            });
+          }}
+          disabled={this.state.isSaving}
+        >
+          撮影して保存する
+        </button>
+        {this.state.fileName ? <span>{this.state.fileName}</span> : null}
+        <div
+          id="container"
+          className="avatar-view__container"
+          style={{ transform: `scale(${this.state.zoom})` }}
+        >
+          <video
+            className="avatar-view__video"
+            ref="video"
+            width="400"
+            height="300"
+            preload="auto"
+            playsInline={true}
+            autoPlay={true}
+            onCanPlay={this.onReadyVideo}
+          ></video>
+          <canvas
+            ref="overlay"
+            className="avatar-view__overlay"
+            width="400"
+            height="300"
+          ></canvas>
+          <canvas
+            ref="webgl"
+            className="avatar-view__webgl"
+            width="400"
+            height="300"
+          ></canvas>
+        </div>
       </div>
-    </div>;
+    );
   }
 
   private onReadyVideo = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     this.clmWrapper.start(this.refs.video as HTMLVideoElement);
     this.drawGridLoop();
-  }
+  };
 
   private restartTracking = () => {
     cancelAnimationFrame(this.animationFrameId);
     clearOverlay(this.refs.overlay as HTMLCanvasElement);
     this.clmWrapper.start(this.refs.video as HTMLVideoElement);
     this.drawGridLoop();
-  }
+  };
 
   private drawGridLoop = () => {
     const positions = this.clmWrapper.getCurrentPosition();
-    const overlay = this.refs.overlay as HTMLCanvasElement
+    const overlay = this.refs.overlay as HTMLCanvasElement;
     clearOverlay(this.refs.overlay as HTMLCanvasElement);
     if (positions) {
       // draw current grid
       this.clmWrapper.drawPositions(overlay);
     }
     this.animationFrameId = requestAnimationFrame(this.drawGridLoop);
-  }
+  };
 }
-
