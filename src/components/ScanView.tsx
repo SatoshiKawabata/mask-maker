@@ -52,7 +52,7 @@ export class ScanView extends React.Component<
             this.setState({ isVideoReverse: !this.state.isVideoReverse })
           }
         />
-        <label htmlFor="is-video-reverse">Reverse</label>
+        <label htmlFor="is-video-reverse">左右反転</label>
         <div className="scan-view__container">
           <video
             className={
@@ -100,7 +100,7 @@ export class ScanView extends React.Component<
               onClick={this.onClickSave}
               disabled={!this.state.snapshotBlob || !this.state.snapshotName}
             >
-              Save
+              保存する
             </button>
             <p>upload state: {this.state.uploadState}</p>
             <img src={this.state.snapshotSrc} />
