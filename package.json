@@ -7,9 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "copy-lib": "cp -r -f ./clmtrackr/examples/js/ ./build/js/ ; cp ./src/style.css ./build",
     "start": "cp ./src/style.css ./build ; npm run copy-lib ; ./node_modules/.bin/webpack-dev-server",
-    "start-mock": "MOCK=true npm start",
+    "start:mock": "MOCK=true npm start",
     "build": "./node_modules/.bin/webpack ; npm run copy-lib",
-    "build-mock": "MOCK=true ./node_modules/.bin/webpack ; npm run copy-lib"
+    "build:mock": "MOCK=true ./node_modules/.bin/webpack ; npm run copy-lib",
+    "build:docs": "npm run build:mock ; rm -rf ./docs ; mkdir ./docs ; cp -pR ./build/* ./docs"
   },
   "author": "",
   "license": "ISC",
