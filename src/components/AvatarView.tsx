@@ -127,9 +127,9 @@ export class AvatarView extends React.Component<{}, State> {
             width="400"
             height="300"
           ></canvas>
-          <p className="avatar-view__note">顔をトラッキング中です...</p>
-          {/* {this.state.isTracking ? null : (
-          )} */}
+          {this.state.isTracking ? null : (
+            <p className="avatar-view__note">顔をトラッキング中です...</p>
+          )}
         </div>
       </div>
     );
